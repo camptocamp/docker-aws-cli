@@ -7,23 +7,17 @@ LABEL description="An Alpine based docker image contains a good combination of c
  tools included: Docker, AWS-CLI, Kubectl, Helm, Curl, Python, Envsubst, Python, Pip, Git, Bash, AWS-IAM-Auth."
 LABEL maintainer="eng.ahmed.srour@gmail.com"
 
-ENV AWS_CLI_VERSION 1.16.81
+ENV AWS_CLI_VERSION 1.16.214
 
-
-RUN apk add --no-cache python3 && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
-    rm -r /root/.cache
-
-
-RUN apk --no-cache update && \
-    apk --no-cache add curl jq make bash ca-certificates groff less && \
-    pip3 install --upgrade awscli urllib3 && \
-    pip3 --no-cache-dir install awscli==${AWS_CLI_VERSION} docker-compose wget && \
-    rm -rf /var/cache/apk/*
+RUN apk add --update \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+    curl jq make bash ca-certificates groff less \
+    && pip install awscli==$AWS_CLI_VERSION --upgrade --user \
+    && apk --purge -v del py-pip \
+    && rm -rf /var/cache/apk/*
 
 ADD https://github.com/a8m/envsubst/releases/download/v1.1.0/envsubst-Linux-x86_64 /usr/local/bin/envsubst
 RUN chmod +x /usr/local/bin/envsubst
